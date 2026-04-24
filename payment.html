@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment | CineBook</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .payment-layout {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* Method tabs */
+    .method-tabs {
+      display: flex;
+      gap: 0;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .method-tab {
+      flex: 1;
+      padding: 12px;
+      background: var(--surface);
+      border: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text2);
+      border-right: 1.5px solid var(--border);
+    }
+    .method-tab:last-child { border-right: none; }
+    .method-tab.active { background: var(--accent); color: #fff; }
+    .method-tab:hover:not(.active) { background: var(--surface2); }
+
+    .payment-form { display: none; }
+    .payment-form.active { display: block; }
+
+    /* Card input */
+    .card-visual {
+      background: linear-gradient(135deg, #2d2d2b 0%, #4a4a48 100%);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-visual::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.05);
+    }
+    .card-chip { font-size: 22px; margin-bottom: 16px; }
+    .card-number {
+      font-size: 18px;
+      letter-spacing: 4px;
+      font-weight: 500;
+      margin-bottom: 20px;
+      font-family: 'DM Sans', monospace;
+    }
+    .card-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+    .card-label { font-size: 11px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; }
+    .card-val { font-size: 14px; font-weight: 500; margin-top: 4px; }
+
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+    /* UPI */
+    .upi-apps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .upi-app {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface);
+    }
+    .upi-app:hover, .upi-app.active { border-color: var(--accent); background: var(--surface2); }
+    .upi-app-icon { font-size: 24px; margin-bottom: 4px; }
+    .upi-app-name { font-size: 12px; color: var(--text2); }
+
+    /* Order summary */
+    .order-section { margin-bottom: 16px; }
+    .order-movie {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      padding: 16px;
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      margin-bottom: 16px;
+    }
+    .order-movie-icon { font-size: 28px; }
+    .order-movie-name { font-weight: 600; }
+    .order-movie-meta { font-size: 13px; color: var(--text2); }
+
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .order-row-label { color: var(--text2); }
+    .order-row-val { font-weight: 500; }
+
+    .order-seats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+
+    .order-total {
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .processing-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .processing-overlay.show { display: flex; }
+    .processing-box {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 40px 48px;
+      text-align: center;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .payment-layout { grid-template-columns: 1fr; }
+      .upi-apps { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="home.html" class="logo">Cine<span style="color:var(--red)">Book</span></a>
+    <ul class="nav-links">
+      <li><a href="home.html">Home</a></li>
+      <li><a href="movies.html">Movies</a></li>
+      <li><a href="login.html" id="logoutBtn">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div style="background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;">
+    <div class="steps">
+      <div class="step done"><span class="step-num">✓</span> Movie</div>
+      <span class="sep">›</span>
+      <div class="step done"><span class="step-num">✓</span> Showtime</div>
+      <span class="sep">›</span>
+      <div class="step done"><span class="step-num">✓</span> Seats</div>
+      <span class="sep">›</span>
+      <div class="step active"><span class="step-num">4</span> Payment</div>
+      <span class="sep">›</span>
+      <div class="step"><span class="step-num">5</span> Ticket</div>
+    </div>
+  </div>
+
+  <div class="payment-layout">
+    <!-- Payment Form -->
+    <div>
+      <h2 class="section-title">Payment</h2>
+      <p style="color:var(--text2);font-size:14px;margin-bottom:24px;">All transactions are secure and encrypted.</p>
+
+      <div class="method-tabs">
+        <button class="method-tab active" onclick="setMethod('card', this)">💳 Card</button>
+        <button class="method-tab" onclick="setMethod('upi', this)">📱 UPI</button>
+        <button class="method-tab" onclick="setMethod('netbank', this)">🏦 Net Banking</button>
+        <button class="method-tab" onclick="setMethod('wallet', this)">👜 Wallet</button>
+      </div>
+
+      <!-- Card Form -->
+      <div class="payment-form active" id="form-card">
+        <div class="card-visual">
+          <div class="card-chip">💳</div>
+          <div class="card-number" id="cardDisplay">•••• •••• •••• ••••</div>
+          <div class="card-bottom">
+            <div>
+              <div class="card-label">Card holder</div>
+              <div class="card-val" id="cardNameDisplay">YOUR NAME</div>
+            </div>
+            <div>
+              <div class="card-label">Expires</div>
+              <div class="card-val" id="cardExpDisplay">MM/YY</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Card number</label>
+          <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="19">
+        </div>
+        <div class="form-group">
+          <label>Cardholder name</label>
+          <input type="text" id="cardName" placeholder="Name on card">
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Expiry date</label>
+            <input type="text" id="cardExpiry" placeholder="MM / YY" maxlength="7">
+          </div>
+          <div class="form-group">
+            <label>CVV</label>
+            <input type="password" id="cardCvv" placeholder="•••" maxlength="3">
+          </div>
+        </div>
+      </div>
+
+      <!-- UPI Form -->
+      <div class="payment-form" id="form-upi">
+        <div class="upi-apps">
+          <div class="upi-app active" onclick="selectUpi(this)"><div class="upi-app-icon">📲</div><div class="upi-app-name">GPay</div></div>
+          <div class="upi-app" onclick="selectUpi(this)"><div class="upi-app-icon">💜</div><div class="upi-app-name">PhonePe</div></div>
+          <div class="upi-app" onclick="selectUpi(this)"><div class="upi-app-icon">🔵</div><div class="upi-app-name">Paytm</div></div>
+          <div class="upi-app" onclick="selectUpi(this)"><div class="upi-app-icon">🟠</div><div class="upi-app-name">BHIM</div></div>
+        </div>
+        <div class="form-group">
+          <label>UPI ID</label>
+          <input type="text" id="upiId" placeholder="yourname@upi">
+        </div>
+      </div>
+
+      <!-- Net Banking -->
+      <div class="payment-form" id="form-netbank">
+        <div class="form-group">
+          <label>Select bank</label>
+          <select id="bankSelect">
+            <option>State Bank of India</option>
+            <option>HDFC Bank</option>
+            <option>ICICI Bank</option>
+            <option>Axis Bank</option>
+            <option>Kotak Mahindra Bank</option>
+            <option>Punjab National Bank</option>
+          </select>
+        </div>
+        <p style="font-size:13px;color:var(--text2);">You will be redirected to your bank's secure login page to complete the payment.</p>
+      </div>
+
+      <!-- Wallet -->
+      <div class="payment-form" id="form-wallet">
+        <div class="upi-apps">
+          <div class="upi-app active" onclick="selectUpi(this)"><div class="upi-app-icon">🔴</div><div class="upi-app-name">Freecharge</div></div>
+          <div class="upi-app" onclick="selectUpi(this)"><div class="upi-app-icon">🔵</div><div class="upi-app-name">MobiKwik</div></div>
+          <div class="upi-app" onclick="selectUpi(this)"><div class="upi-app-icon">🟡</div><div class="upi-app-name">Airtel</div></div>
+          <div class="upi-app" onclick="selectUpi(this)"><div class="upi-app-icon">⚫</div><div class="upi-app-name">Jio</div></div>
+        </div>
+      </div>
+
+      <button class="btn btn-red btn-full btn-lg" style="margin-top:8px;" onclick="processPayment()" id="payBtn">
+        Pay Now →
+      </button>
+      <a href="seats.html" class="btn btn-outline btn-full" style="margin-top:10px;">← Change Seats</a>
+    </div>
+
+    <!-- Order Summary -->
+    <div>
+      <div class="card">
+        <h3 style="font-size:16px;font-weight:600;margin-bottom:16px;">Order Summary</h3>
+
+        <div class="order-movie">
+          <div class="order-movie-icon" id="summaryIcon">🎬</div>
+          <div>
+            <div class="order-movie-name" id="summaryTitle">—</div>
+            <div class="order-movie-meta" id="summaryMeta">—</div>
+          </div>
+        </div>
+
+        <div class="order-row">
+          <span class="order-row-label">Theatre</span>
+          <span class="order-row-val" id="summaryTheatre">—</span>
+        </div>
+        <div class="order-row">
+          <span class="order-row-label">Date &amp; Time</span>
+          <span class="order-row-val" id="summaryTime">—</span>
+        </div>
+        <div class="order-row" style="align-items:flex-start;">
+          <span class="order-row-label">Seats</span>
+          <div class="order-seats" id="summarySeats"></div>
+        </div>
+        <div class="order-row">
+          <span class="order-row-label">Tickets</span>
+          <span class="order-row-val" id="summaryCount">—</span>
+        </div>
+        <div class="order-row">
+          <span class="order-row-label">Convenience fee</span>
+          <span class="order-row-val" id="summaryFee">₹0</span>
+        </div>
+
+        <div class="order-total">
+          <span style="font-weight:600;font-size:15px;">Total payable</span>
+          <span style="font-size:22px;font-weight:600;color:var(--red);" id="summaryTotal">₹0</span>
+        </div>
+
+        <div style="margin-top:16px;padding:12px;background:var(--green-light);border-radius:var(--radius-sm);font-size:13px;color:var(--green);">
+          🔒 100% secure payment
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Processing Overlay -->
+  <div class="processing-overlay" id="processingOverlay">
+    <div class="processing-box">
+      <div class="spinner"></div>
+      <p style="font-weight:600;font-size:16px;">Processing payment...</p>
+      <p style="font-size:14px;color:var(--text2);margin-top:6px;">Please do not close this window.</p>
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 CineBook. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('cb_user') || 'null');
+    if (!user) { window.location.href = 'login.html'; }
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+      e.preventDefault(); localStorage.removeItem('cb_user'); window.location.href = 'login.html';
+    });
+
+    const booking = JSON.parse(localStorage.getItem('cb_booking') || 'null');
+    if (!booking) { window.location.href = 'movies.html'; }
+
+    const convFee = Math.round(booking.total * 0.03);
+    const grandTotal = booking.total + convFee;
+
+    document.getElementById('summaryIcon').textContent = localStorage.getItem('cb_movie') ? JSON.parse(localStorage.getItem('cb_movie')).icon : '🎬';
+    document.getElementById('summaryTitle').textContent = booking.movie;
+    document.getElementById('summaryMeta').textContent = booking.theatre + ' · ' + booking.time;
+    document.getElementById('summaryTheatre').textContent = booking.theatre;
+    document.getElementById('summaryTime').textContent = booking.time;
+    document.getElementById('summarySeats').innerHTML = booking.seats.map(s => `<span class="badge badge-grey">${s}</span>`).join('');
+    document.getElementById('summaryCount').textContent = booking.seats.length + ' ticket(s)';
+    document.getElementById('summaryFee').textContent = '₹' + convFee;
+    document.getElementById('summaryTotal').textContent = '₹' + grandTotal;
+    document.getElementById('payBtn').textContent = `Pay ₹${grandTotal} →`;
+
+    function setMethod(method, btn) {
+      document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.payment-form').forEach(f => f.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('form-' + method).classList.add('active');
+    }
+
+    function selectUpi(el) {
+      el.closest('.upi-apps').querySelectorAll('.upi-app').forEach(a => a.classList.remove('active'));
+      el.classList.add('active');
+    }
+
+    // Live card preview
+    document.getElementById('cardNumber').addEventListener('input', function() {
+      let val = this.value.replace(/\D/g, '').substring(0, 16);
+      this.value = val.replace(/(.{4})/g, '$1 ').trim();
+      document.getElementById('cardDisplay').textContent = val.padEnd(16, '•').replace(/(.{4})/g, '$1 ').trim();
+    });
+    document.getElementById('cardName').addEventListener('input', function() {
+      document.getElementById('cardNameDisplay').textContent = this.value.toUpperCase() || 'YOUR NAME';
+    });
+    document.getElementById('cardExpiry').addEventListener('input', function() {
+      let val = this.value.replace(/\D/g, '');
+      if (val.length >= 3) val = val.substring(0,2) + ' / ' + val.substring(2);
+      this.value = val;
+      document.getElementById('cardExpDisplay').textContent = this.value || 'MM/YY';
+    });
+
+    function processPayment() {
+      document.getElementById('processingOverlay').classList.add('show');
+      // Store final booking details
+      const finalBooking = {
+        ...booking,
+        convFee,
+        grandTotal,
+        bookingId: 'CB' + Date.now().toString().slice(-8),
+        user: user.name || user.email,
+        bookedAt: new Date().toISOString()
+      };
+      localStorage.setItem('cb_final_booking', JSON.stringify(finalBooking));
+
+      setTimeout(() => {
+        window.location.href = 'ticket.html';
+      }, 2500);
+    }
+  </script>
+</body>
+</html>

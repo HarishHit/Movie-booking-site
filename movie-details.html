@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movie Details | CineBook</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .movie-hero {
+      background: var(--accent);
+      padding: 48px 40px;
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+    }
+
+    .movie-hero-poster {
+      width: 200px;
+      height: 280px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 80px;
+      flex-shrink: 0;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .movie-hero-info { flex: 1; }
+
+    .movie-hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px;
+      color: #fff;
+      letter-spacing: -0.5px;
+      margin-bottom: 8px;
+    }
+
+    .movie-hero-meta {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .movie-hero-meta span {
+      font-size: 14px;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .movie-hero-meta .sep { color: rgba(255,255,255,0.25); }
+
+    .movie-hero-desc {
+      color: rgba(255,255,255,0.6);
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 560px;
+      margin-bottom: 24px;
+    }
+
+    .movie-hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* Showtimes */
+    .showtime-section { padding: 40px; }
+
+    .date-selector {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 32px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+
+    .date-btn {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 12px 18px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      background: var(--surface);
+      transition: all 0.2s;
+      min-width: 70px;
+    }
+    .date-btn:hover { border-color: var(--accent); }
+    .date-btn.active { background: var(--accent); border-color: var(--accent); }
+    .date-btn.active .date-day, .date-btn.active .date-num { color: #fff; }
+    .date-day { font-size: 12px; color: var(--text2); font-weight: 500; text-transform: uppercase; }
+    .date-num { font-size: 20px; font-weight: 600; color: var(--text); }
+
+    .theatre-showtime {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 16px;
+    }
+
+    .theatre-showtime-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .theatre-showtime-name { font-size: 16px; font-weight: 600; }
+    .theatre-showtime-loc { font-size: 13px; color: var(--text2); }
+
+    .time-slots { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .time-slot {
+      padding: 10px 18px;
+      border: 1.5px solid var(--border2);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      background: var(--surface);
+      transition: all 0.2s;
+    }
+    .time-slot:hover { border-color: var(--accent); background: var(--surface2); }
+    .time-slot.selected { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .time-slot .seats-left { font-size: 11px; color: var(--text3); display: block; margin-top: 2px; }
+    .time-slot.selected .seats-left { color: rgba(255,255,255,0.6); }
+    .time-slot.full { opacity: 0.45; cursor: not-allowed; }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .info-item {
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+    }
+    .info-item-label { font-size: 12px; color: var(--text3); margin-bottom: 4px; }
+    .info-item-value { font-size: 15px; font-weight: 600; }
+
+    @media (max-width: 768px) {
+      .movie-hero { flex-direction: column; padding: 32px 20px; }
+      .movie-hero-poster { width: 140px; height: 200px; font-size: 60px; }
+      .movie-hero-title { font-size: 28px; }
+      .showtime-section { padding: 24px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="home.html" class="logo">Cine<span style="color:var(--red)">Book</span></a>
+    <ul class="nav-links">
+      <li><a href="home.html">Home</a></li>
+      <li><a href="movies.html">Movies</a></li>
+      <li><a href="login.html" id="logoutBtn">Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- Movie Hero -->
+  <section class="movie-hero" id="movieHero">
+    <div class="movie-hero-poster" id="moviePoster">🎬</div>
+    <div class="movie-hero-info">
+      <h1 class="movie-hero-title" id="movieTitle">Loading...</h1>
+      <div class="movie-hero-meta">
+        <span id="movieGenre">—</span>
+        <span class="sep">·</span>
+        <span id="movieDuration">—</span>
+        <span class="sep">·</span>
+        <span id="movieYear">—</span>
+        <span class="sep">·</span>
+        <span id="movieRating">⭐ —</span>
+      </div>
+      <p class="movie-hero-desc" id="movieDesc">—</p>
+      <div class="movie-hero-actions">
+        <a href="movies.html" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.3);">← Back to Movies</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Showtimes -->
+  <section class="showtime-section">
+    <div style="max-width:900px;margin:0 auto;">
+
+      <div class="info-grid" id="infoGrid"></div>
+
+      <h2 class="section-title">Select Date</h2>
+      <div class="date-selector" id="dateSelector"></div>
+
+      <h2 class="section-title" style="margin-top:8px;">Select Showtime</h2>
+      <div id="showtimeList"></div>
+
+      <div id="proceedBar" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 24px;margin-top:24px;display:none;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+        <div>
+          <p style="font-size:13px;color:var(--text2);">Selected show</p>
+          <p style="font-size:16px;font-weight:600;" id="selectedShowLabel">—</p>
+        </div>
+        <button class="btn btn-red btn-lg" onclick="proceedToSeats()">Select Seats →</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 CineBook. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('cb_user') || 'null');
+    if (!user) { window.location.href = 'login.html'; }
+
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+      e.preventDefault(); localStorage.removeItem('cb_user'); window.location.href = 'login.html';
+    });
+
+    const movie = JSON.parse(localStorage.getItem('cb_movie') || 'null');
+    if (!movie) { window.location.href = 'movies.html'; }
+
+    document.getElementById('moviePoster').textContent = movie.icon || '🎬';
+    document.getElementById('movieTitle').textContent = movie.title;
+    document.getElementById('movieGenre').textContent = movie.genre;
+    document.getElementById('movieDuration').textContent = movie.duration;
+    document.getElementById('movieYear').textContent = movie.year || '2024';
+    document.getElementById('movieRating').textContent = '⭐ ' + (movie.rating || '8.0');
+    document.getElementById('movieDesc').textContent = movie.desc || 'An incredible cinematic experience.';
+
+    document.getElementById('infoGrid').innerHTML = `
+      <div class="info-item"><div class="info-item-label">Ticket price</div><div class="info-item-value">₹${movie.price}</div></div>
+      <div class="info-item"><div class="info-item-label">Duration</div><div class="info-item-value">${movie.duration}</div></div>
+      <div class="info-item"><div class="info-item-label">Language</div><div class="info-item-value">Tamil / Hindi</div></div>
+      <div class="info-item"><div class="info-item-label">Format</div><div class="info-item-value">2D / 3D</div></div>
+    `;
+
+    // Dates (next 5 days)
+    const today = new Date();
+    const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    let activeDateIdx = 0;
+
+    const dateSelector = document.getElementById('dateSelector');
+    for (let i = 0; i < 5; i++) {
+      const d = new Date(today); d.setDate(today.getDate() + i);
+      const btn = document.createElement('div');
+      btn.className = 'date-btn' + (i === 0 ? ' active' : '');
+      btn.innerHTML = `<span class="date-day">${i === 0 ? 'Today' : days[d.getDay()]}</span><span class="date-num">${d.getDate()}</span><span class="date-day">${months[d.getMonth()]}</span>`;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.date-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeDateIdx = i;
+        selectedShow = null;
+        document.getElementById('proceedBar').style.display = 'none';
+        document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+      });
+      dateSelector.appendChild(btn);
+    }
+
+    const theatres = [
+      { name: 'Grand Cinemas', location: 'RS Puram', times: ['10:30 AM', '1:45 PM', '5:00 PM', '8:15 PM', '10:45 PM'], seats: [42, 18, 60, 35, 8] },
+      { name: 'PVR Prozone Mall', location: 'Avinashi Road', times: ['9:00 AM', '12:15 PM', '3:30 PM', '7:00 PM', '10:00 PM'], seats: [0, 55, 28, 15, 40] },
+      { name: 'Sree Bharathi', location: 'Gandhipuram', times: ['11:00 AM', '2:30 PM', '6:00 PM', '9:00 PM'], seats: [22, 0, 45, 33] },
+    ];
+
+    let selectedShow = null;
+
+    const showtimeList = document.getElementById('showtimeList');
+    showtimeList.innerHTML = theatres.map((t, ti) => `
+      <div class="theatre-showtime">
+        <div class="theatre-showtime-header">
+          <div>
+            <div class="theatre-showtime-name">${t.name}</div>
+            <div class="theatre-showtime-loc">📍 ${t.location}</div>
+          </div>
+          <span class="badge badge-grey">₹${movie.price}</span>
+        </div>
+        <div class="time-slots">
+          ${t.times.map((time, i) => {
+            const seats = t.seats[i];
+            const isFull = seats === 0;
+            return `<div class="time-slot ${isFull ? 'full' : ''}" data-theatre="${t.name}" data-time="${time}" data-loc="${t.location}" ${!isFull ? `onclick="selectShow(this,'${t.name}','${t.location}','${time}')"` : ''}>
+              ${time}
+              <span class="seats-left">${isFull ? 'Sold out' : seats + ' seats left'}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    function selectShow(el, theatre, location, time) {
+      document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedShow = { theatre, location, time };
+      localStorage.setItem('cb_show', JSON.stringify(selectedShow));
+      const bar = document.getElementById('proceedBar');
+      document.getElementById('selectedShowLabel').textContent = `${theatre} · ${time}`;
+      bar.style.display = 'flex';
+    }
+
+    function proceedToSeats() {
+      if (!selectedShow) return;
+      window.location.href = 'seats.html';
+    }
+  </script>
+</body>
+</html>

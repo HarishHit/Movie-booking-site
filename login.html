@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | CineBook</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    body { display: flex; min-height: 100vh; }
+
+    .auth-left {
+      flex: 1;
+      background: var(--accent);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 40px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-left::before {
+      content: '';
+      position: absolute;
+      top: -80px; right: -80px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .auth-left::after {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -60px;
+      width: 250px; height: 250px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .auth-left-content { text-align: center; position: relative; z-index: 1; }
+
+    .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      color: #fff;
+      letter-spacing: -0.5px;
+    }
+    .brand span { color: #e8765e; }
+
+    .auth-left-tagline {
+      color: rgba(255,255,255,0.55);
+      font-size: 15px;
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+
+    .auth-features {
+      margin-top: 48px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      text-align: left;
+      width: 100%;
+      max-width: 260px;
+    }
+
+    .auth-feature {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+    }
+
+    .auth-feature-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .auth-right {
+      width: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 48px;
+      background: var(--bg);
+    }
+
+    .auth-form-wrap { width: 100%; max-width: 360px; }
+
+    .auth-title {
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .auth-subtitle {
+      color: var(--text2);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: var(--text2);
+    }
+
+    .auth-footer a { color: var(--text); font-weight: 500; text-decoration: none; }
+    .auth-footer a:hover { text-decoration: underline; }
+
+    .forgot { font-size: 13px; color: var(--text2); text-decoration: none; float: right; margin-top: -14px; margin-bottom: 18px; }
+    .forgot:hover { color: var(--text); }
+
+    @media (max-width: 768px) {
+      .auth-left { display: none; }
+      .auth-right { width: 100%; padding: 40px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-left">
+    <div class="auth-left-content">
+      <div class="brand">Cine<span>Book</span></div>
+      <p class="auth-left-tagline">Your favourite movies,<br>at your fingertips.</p>
+      <div class="auth-features">
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🎬</div>
+          <span>Book tickets in under 2 minutes</span>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🎭</div>
+          <span>Choose your perfect seats</span>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🎟️</div>
+          <span>Instant digital ticket delivery</span>
+        </div>
+        <div class="auth-feature">
+          <div class="auth-feature-icon">🏙️</div>
+          <span>Top theatres across your city</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="auth-right">
+    <div class="auth-form-wrap">
+      <h1 class="auth-title">Welcome back</h1>
+      <p class="auth-subtitle">Sign in to continue booking</p>
+
+      <div id="alertBox"></div>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input type="email" id="email" placeholder="you@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" required>
+        </div>
+
+        <a href="#" class="forgot">Forgot password?</a>
+
+        <button type="submit" class="btn btn-primary btn-full btn-lg">Sign In</button>
+      </form>
+
+      <hr class="divider">
+
+      <p class="auth-footer">
+        New to CineBook? <a href="register.html">Create an account</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const alertBox = document.getElementById('alertBox');
+
+    function showAlert(msg, type) {
+      alertBox.innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+    }
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!email || !password) {
+        showAlert('Please fill in all fields.', 'error'); return;
+      }
+
+      // Check registered users from localStorage
+      const users = JSON.parse(localStorage.getItem('cb_users') || '[]');
+      const user = users.find(u => u.email === email && u.password === password);
+
+      // Also allow demo account
+      if (user || (email === 'demo@cinebook.com' && password === 'demo123')) {
+        const loggedUser = user || { name: 'Demo User', email };
+        localStorage.setItem('cb_user', JSON.stringify(loggedUser));
+        showAlert('Login successful! Redirecting...', 'success');
+        setTimeout(() => window.location.href = 'home.html', 1000);
+      } else {
+        showAlert('Invalid email or password. Try demo@cinebook.com / demo123', 'error');
+      }
+    });
+  </script>
+</body>
+</html>

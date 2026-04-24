@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Movies | CineBook</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    .filter-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-bar label { font-size: 13px; font-weight: 500; color: var(--text2); }
+    .filter-bar select, .filter-bar input {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      outline: none;
+    }
+    .filter-bar select:focus, .filter-bar input:focus { border-color: var(--accent); }
+    .filter-bar input { width: 200px; }
+
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .movie-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .movie-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+
+    .movie-poster {
+      width: 100%; height: 270px;
+      background: linear-gradient(135deg, #d4d1ca 0%, #b8b5ae 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 56px;
+      position: relative;
+    }
+
+    .movie-poster img { width: 100%; height: 100%; object-fit: cover; }
+
+    .movie-poster .rating-badge {
+      position: absolute;
+      top: 10px; right: 10px;
+      background: rgba(0,0,0,0.7);
+      color: #fff;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .movie-info { padding: 14px; }
+    .movie-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+    .movie-meta { font-size: 12px; color: var(--text2); margin-bottom: 10px; }
+    .movie-price { font-size: 13px; color: var(--red); font-weight: 600; }
+
+    .movie-card .book-btn {
+      display: block;
+      width: calc(100% - 28px);
+      margin: 0 14px 14px;
+      padding: 10px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .movie-card .book-btn:hover { background: #3d3d3b; }
+
+    .genre-filter {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .genre-btn {
+      padding: 7px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text2);
+    }
+    .genre-btn:hover, .genre-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .results-count { font-size: 14px; color: var(--text2); margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="home.html" class="logo">Cine<span style="color:var(--red)">Book</span></a>
+    <ul class="nav-links">
+      <li><a href="home.html">Home</a></li>
+      <li><a href="movies.html" class="active">Movies</a></li>
+      <li><a href="login.html" id="logoutBtn">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="filter-bar">
+    <label>🔍</label>
+    <input type="text" id="searchInput" placeholder="Search movies...">
+    <label>Genre:</label>
+    <select id="genreSelect">
+      <option value="">All Genres</option>
+      <option value="Action">Action</option>
+      <option value="Sci-Fi">Sci-Fi</option>
+      <option value="Thriller">Thriller</option>
+      <option value="Drama">Drama</option>
+      <option value="Biography">Biography</option>
+      <option value="Adventure">Adventure</option>
+      <option value="Fantasy">Fantasy</option>
+    </select>
+    <label>Sort:</label>
+    <select id="sortSelect">
+      <option value="default">Default</option>
+      <option value="price-low">Price: Low to High</option>
+      <option value="price-high">Price: High to Low</option>
+      <option value="name">Name A–Z</option>
+    </select>
+  </div>
+
+  <div class="page-wrapper">
+    <div class="genre-filter" id="genreFilter">
+      <button class="genre-btn active" data-genre="">All</button>
+      <button class="genre-btn" data-genre="Action">Action</button>
+      <button class="genre-btn" data-genre="Sci-Fi">Sci-Fi</button>
+      <button class="genre-btn" data-genre="Thriller">Thriller</button>
+      <button class="genre-btn" data-genre="Drama">Drama</button>
+      <button class="genre-btn" data-genre="Biography">Biography</button>
+      <button class="genre-btn" data-genre="Adventure">Adventure</button>
+    </div>
+
+    <p class="results-count" id="resultsCount">Showing 8 movies</p>
+
+    <div class="movie-grid" id="movieGrid"></div>
+  </div>
+
+  <footer>
+    <p>© 2026 CineBook. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem('cb_user') || 'null');
+    if (!user) { window.location.href = 'login.html'; }
+
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('cb_user');
+      window.location.href = 'login.html';
+    });
+
+    const allMovies = [
+      { id: 1, title: 'Interstellar', genre: 'Sci-Fi', duration: '2h 49m', price: 200, rating: 8.6, year: 2014, icon: '🚀', desc: 'A team of explorers travel through a wormhole in space in an attempt to ensure humanity\'s survival.' },
+      { id: 2, title: 'Inception', genre: 'Thriller', duration: '2h 28m', price: 180, rating: 8.8, year: 2010, icon: '🌀', desc: 'A thief who steals corporate secrets through dream-sharing technology is given the task of planting an idea.' },
+      { id: 3, title: 'Avengers: Endgame', genre: 'Action', duration: '3h 01m', price: 220, rating: 8.4, year: 2019, icon: '⚡', desc: 'After the devastating events of Infinity War, the Avengers assemble once more to reverse Thanos\'s actions.' },
+      { id: 4, title: 'Joker', genre: 'Drama', duration: '2h 02m', price: 160, rating: 8.4, year: 2019, icon: '🃏', desc: 'A mentally troubled stand-up comedian embarks on a downward spiral that leads to the creation of an iconic villain.' },
+      { id: 5, title: 'Oppenheimer', genre: 'Biography', duration: '3h 00m', price: 250, rating: 8.3, year: 2023, icon: '💥', desc: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.' },
+      { id: 6, title: 'Spider-Man: NWH', genre: 'Adventure', duration: '2h 28m', price: 190, rating: 8.2, year: 2021, icon: '🕷️', desc: 'Peter Parker seeks help from Doctor Strange to make the world forget he is Spider-Man, with disastrous results.' },
+      { id: 7, title: 'Doctor Strange', genre: 'Fantasy', duration: '2h 15m', price: 200, rating: 7.5, year: 2022, icon: '🌟', desc: 'Doctor Strange teams up with a mysterious Scarlet Witch to protect the multiverse from enemies.' },
+      { id: 8, title: 'Batman', genre: 'Action', duration: '2h 56m', price: 210, rating: 7.8, year: 2022, icon: '🦇', desc: 'Batman ventures into Gotham City\'s underworld when a sadistic killer leaves behind a trail of cryptic clues.' },
+    ];
+
+    let activeGenre = '';
+
+    function getFilteredMovies() {
+      let movies = [...allMovies];
+      const search = document.getElementById('searchInput').value.toLowerCase();
+      const genre = document.getElementById('genreSelect').value;
+      const sort = document.getElementById('sortSelect').value;
+
+      if (search) movies = movies.filter(m => m.title.toLowerCase().includes(search));
+      if (genre) movies = movies.filter(m => m.genre === genre);
+      if (activeGenre) movies = movies.filter(m => m.genre === activeGenre);
+
+      if (sort === 'price-low') movies.sort((a,b) => a.price - b.price);
+      else if (sort === 'price-high') movies.sort((a,b) => b.price - a.price);
+      else if (sort === 'name') movies.sort((a,b) => a.title.localeCompare(b.title));
+
+      return movies;
+    }
+
+    function renderMovies() {
+      const movies = getFilteredMovies();
+      document.getElementById('resultsCount').textContent = `Showing ${movies.length} movie${movies.length !== 1 ? 's' : ''}`;
+      const grid = document.getElementById('movieGrid');
+      if (movies.length === 0) {
+        grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--text2);">No movies found. Try a different search.</div>`;
+        return;
+      }
+      grid.innerHTML = movies.map(m => `
+        <div class="movie-card" onclick="selectMovie(${m.id})">
+          <div class="movie-poster">
+            ${m.icon}
+            <div class="rating-badge">⭐ ${m.rating}</div>
+          </div>
+          <div class="movie-info">
+            <div class="movie-title">${m.title}</div>
+            <div class="movie-meta">${m.genre} · ${m.duration} · ${m.year}</div>
+            <div class="movie-price">₹${m.price} onwards</div>
+          </div>
+          <button class="book-btn" onclick="event.stopPropagation();selectMovie(${m.id})">Book Now</button>
+        </div>
+      `).join('');
+    }
+
+    function selectMovie(id) {
+      const m = allMovies.find(x => x.id === id);
+      localStorage.setItem('cb_movie', JSON.stringify(m));
+      window.location.href = 'movie-details.html';
+    }
+
+    document.getElementById('genreFilter').addEventListener('click', function(e) {
+      const btn = e.target.closest('.genre-btn');
+      if (!btn) return;
+      document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeGenre = btn.dataset.genre;
+      document.getElementById('genreSelect').value = '';
+      renderMovies();
+    });
+
+    document.getElementById('searchInput').addEventListener('input', renderMovies);
+    document.getElementById('genreSelect').addEventListener('change', renderMovies);
+    document.getElementById('sortSelect').addEventListener('change', renderMovies);
+
+    renderMovies();
+  </script>
+</body>
+</html>

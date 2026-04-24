@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CineBook | Home</title>
+  <link rel="stylesheet" href="shared.css">
+  <style>
+    /* Hero */
+    .hero {
+      background: var(--accent);
+      padding: 60px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: -100px; right: -100px;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.03);
+    }
+    .hero-inner { position: relative; z-index: 1; }
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 44px;
+      color: #fff;
+      letter-spacing: -1px;
+      margin-bottom: 12px;
+    }
+    .hero h1 span { color: #e8765e; }
+    .hero p { color: rgba(255,255,255,0.6); font-size: 16px; margin-bottom: 32px; }
+
+    .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+    /* City selector */
+    .city-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 40px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .city-bar label { font-size: 13px; font-weight: 500; color: var(--text2); }
+    .city-bar select {
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 8px 14px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      cursor: pointer;
+      outline: none;
+    }
+    .city-bar select:focus { border-color: var(--accent); }
+
+    /* Theatres */
+    .theatre-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .theatre-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .theatre-card:hover {
+      box-shadow: var(--shadow-lg);
+      transform: translateY(-2px);
+    }
+
+    .theatre-img {
+      width: 100%; height: 160px;
+      object-fit: cover;
+      background: linear-gradient(135deg, #e2e0db 0%, #c8c5be 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 40px;
+    }
+
+    .theatre-body { padding: 20px; }
+    .theatre-name { font-size: 17px; font-weight: 600; margin-bottom: 4px; }
+    .theatre-location { font-size: 13px; color: var(--text2); margin-bottom: 12px; }
+
+    .theatre-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .theatre-screens {
+      font-size: 13px;
+      color: var(--text2);
+      margin-bottom: 16px;
+    }
+
+    .theatre-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+    }
+
+    .theatre-rating {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Now Showing strip */
+    .movie-strip {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      scrollbar-width: none;
+    }
+    .movie-strip::-webkit-scrollbar { display: none; }
+
+    .movie-chip {
+      flex-shrink: 0;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .movie-chip:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* Featured movies section */
+    .movie-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+
+    .movie-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .movie-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-3px); }
+
+    .movie-poster {
+      width: 100%; height: 240px;
+      background: linear-gradient(135deg, #d4d1ca 0%, #b8b5ae 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 48px;
+      position: relative;
+    }
+
+    .movie-poster img { width: 100%; height: 100%; object-fit: cover; }
+
+    .movie-info { padding: 12px; }
+    .movie-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .movie-meta { font-size: 12px; color: var(--text2); }
+
+    /* User greeting */
+    .greeting-bar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .greeting { font-size: 14px; color: var(--text2); }
+    .greeting strong { color: var(--text); }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="home.html" class="logo">Cine<span style="color:var(--red)">Book</span></a>
+    <ul class="nav-links">
+      <li><a href="home.html" class="active">Home</a></li>
+      <li><a href="movies.html">Movies</a></li>
+      <li><a href="login.html" id="logoutBtn">Logout</a></li>
+    </ul>
+  </nav>
+
+  <!-- User greeting bar -->
+  <div class="greeting-bar">
+    <p class="greeting">Good day, <strong id="userName">Guest</strong> 👋</p>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:13px;color:var(--text2);">📍</span>
+      <span style="font-size:13px;color:var(--text2);" id="cityLabel">Coimbatore</span>
+    </div>
+  </div>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-inner">
+      <h1>Book <span>Cinema</span> Tickets<br>in Seconds</h1>
+      <p>Choose your theatre • Pick your seat • Enjoy the show</p>
+      <div class="hero-actions">
+        <a href="movies.html" class="btn btn-red btn-lg">Browse Movies</a>
+        <a href="#theatres" class="btn btn-outline btn-lg" style="color:#fff;border-color:rgba(255,255,255,0.3);">View Theatres</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- City selector -->
+  <div class="city-bar">
+    <label for="citySelect">📍 Showing theatres in:</label>
+    <select id="citySelect">
+      <option value="Coimbatore">Coimbatore</option>
+      <option value="Chennai">Chennai</option>
+      <option value="Bangalore">Bangalore</option>
+      <option value="Hyderabad">Hyderabad</option>
+    </select>
+  </div>
+
+  <!-- Theatres Section -->
+  <div class="page-wrapper" id="theatres">
+    <div class="page-header">
+      <h1 class="section-title">Theatres near you</h1>
+      <p style="color:var(--text2);font-size:14px;">3 premium theatres in <span id="cityName">Coimbatore</span></p>
+    </div>
+
+    <div class="theatre-grid" id="theatreGrid">
+      <!-- Filled by JS -->
+    </div>
+
+    <hr class="divider" style="margin:48px 0 32px;">
+
+    <div class="page-header">
+      <h1 class="section-title">Now Showing</h1>
+      <p style="color:var(--text2);font-size:14px;">Trending movies this week</p>
+    </div>
+
+    <div class="movie-grid" id="movieGrid">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+
+  <footer>
+    <p>© 2026 CineBook. All rights reserved. | Designed for movie lovers.</p>
+  </footer>
+
+  <script>
+    // Auth check
+    const user = JSON.parse(localStorage.getItem('cb_user') || 'null');
+    if (!user) { window.location.href = 'login.html'; }
+    else { document.getElementById('userName').textContent = user.name || user.email; }
+
+    document.getElementById('logoutBtn').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('cb_user');
+      window.location.href = 'login.html';
+    });
+
+    const theatresData = {
+      Coimbatore: [
+        { id: 1, name: 'Grand Cinemas', location: 'RS Puram, Coimbatore', rating: 4.5, screens: 5, amenities: ['4K', 'Dolby', 'Parking', 'Food Court'], icon: '🏛️' },
+        { id: 2, name: 'PVR Prozone Mall', location: 'Avinashi Road, Coimbatore', rating: 4.3, screens: 8, amenities: ['IMAX', '3D', 'Valet', 'Lounge'], icon: '🎪' },
+        { id: 3, name: 'Sree Bharathi', location: 'Gandhipuram, Coimbatore', rating: 4.1, screens: 3, amenities: ['HD', 'AC', 'Parking'], icon: '🎭' }
+      ],
+      Chennai: [
+        { id: 4, name: 'Luxe Cinemas', location: 'Anna Nagar, Chennai', rating: 4.6, screens: 6, amenities: ['IMAX', '4K', 'Lounge'], icon: '🏛️' },
+        { id: 5, name: 'SPI Palazzo', location: 'T. Nagar, Chennai', rating: 4.4, screens: 5, amenities: ['Dolby', '3D', 'Food Court'], icon: '🎪' },
+        { id: 6, name: 'Devi Paradise', location: 'Vadapalani, Chennai', rating: 4.0, screens: 4, amenities: ['HD', 'AC'], icon: '🎭' }
+      ],
+      Bangalore: [
+        { id: 7, name: 'PVR Orion', location: 'Rajajinagar, Bangalore', rating: 4.7, screens: 9, amenities: ['IMAX', '4K', 'Recliner', 'Valet'], icon: '🏛️' },
+        { id: 8, name: 'Inox Garuda', location: 'MG Road, Bangalore', rating: 4.5, screens: 7, amenities: ['Dolby', '3D', 'Lounge'], icon: '🎪' },
+        { id: 9, name: 'Rex Theatre', location: 'Lavelle Road, Bangalore', rating: 4.2, screens: 2, amenities: ['HD', 'Classic'], icon: '🎭' }
+      ],
+      Hyderabad: [
+        { id: 10, name: 'AMB Cinemas', location: 'Gachibowli, Hyderabad', rating: 4.8, screens: 10, amenities: ['IMAX', '4K', 'Premium', 'Valet'], icon: '🏛️' },
+        { id: 11, name: 'Prasads IMAX', location: 'NTR Gardens, Hyderabad', rating: 4.6, screens: 6, amenities: ['IMAX', 'Dolby', 'Food Court'], icon: '🎪' },
+        { id: 12, name: 'Minerva', location: 'Abids, Hyderabad', rating: 4.0, screens: 3, amenities: ['HD', 'AC', 'Parking'], icon: '🎭' }
+      ]
+    };
+
+    const movies = [
+      { id: 1, title: 'Interstellar', genre: 'Sci-Fi', duration: '2h 49m', price: 200, icon: '🚀' },
+      { id: 2, title: 'Inception', genre: 'Thriller', duration: '2h 28m', price: 180, icon: '🌀' },
+      { id: 3, title: 'Avengers', genre: 'Action', duration: '2h 30m', price: 220, icon: '⚡' },
+      { id: 4, title: 'Joker', genre: 'Drama', duration: '2h 02m', price: 160, icon: '🃏' },
+      { id: 5, title: 'Oppenheimer', genre: 'Biography', duration: '3h 00m', price: 250, icon: '💥' },
+      { id: 6, title: 'Spider-Man', genre: 'Adventure', duration: '2h 10m', price: 190, icon: '🕷️' },
+    ];
+
+    function renderTheatres(city) {
+      document.getElementById('cityName').textContent = city;
+      document.getElementById('cityLabel').textContent = city;
+      const theatres = theatresData[city] || theatresData.Coimbatore;
+      const grid = document.getElementById('theatreGrid');
+      grid.innerHTML = theatres.map(t => `
+        <div class="theatre-card">
+          <div class="theatre-img">${t.icon}</div>
+          <div class="theatre-body">
+            <div class="theatre-name">${t.name}</div>
+            <div class="theatre-location">📍 ${t.location}</div>
+            <div class="theatre-meta">
+              ${t.amenities.map(a => `<span class="badge badge-grey">${a}</span>`).join('')}
+            </div>
+            <div class="theatre-screens">${t.screens} screens available</div>
+            <div class="theatre-footer">
+              <div class="theatre-rating">⭐ ${t.rating} <span style="font-weight:400;color:var(--text2);font-size:13px;">/ 5.0</span></div>
+              <a href="movies.html?theatre=${t.id}" class="btn btn-primary" style="padding:8px 18px;font-size:13px;">View Movies →</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderMovies() {
+      const grid = document.getElementById('movieGrid');
+      grid.innerHTML = movies.map(m => `
+        <div class="movie-card" onclick="selectMovie(${m.id})">
+          <div class="movie-poster">${m.icon}</div>
+          <div class="movie-info">
+            <div class="movie-title">${m.title}</div>
+            <div class="movie-meta">${m.genre} · ${m.duration}</div>
+            <div style="margin-top:8px;font-size:13px;color:var(--red);font-weight:500;">₹${m.price} onwards</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectMovie(id) {
+      const m = movies.find(x => x.id === id);
+      localStorage.setItem('cb_movie', JSON.stringify(m));
+      window.location.href = 'movie-details.html';
+    }
+
+    document.getElementById('citySelect').addEventListener('change', function() {
+      renderTheatres(this.value);
+    });
+
+    renderTheatres('Coimbatore');
+    renderMovies();
+  </script>
+</body>
+</html>

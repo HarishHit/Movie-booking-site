@@ -205,7 +205,7 @@
       const user = users.find(u => u.email === email && u.password === password);
 
       // Also allow demo account
-      if (user || (email === 'demo@cinebook.com' && password === 'demo123')) {
+      if (user || (email === 'demo@cinebook.com' && password === 'demo@cinebook123')) {
         const loggedUser = user || { name: 'Demo User', email };
         localStorage.setItem('cb_user', JSON.stringify(loggedUser));
         showAlert('Login successful! Redirecting...', 'success');
